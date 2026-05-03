@@ -3,124 +3,184 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Debt Tracker</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Debt & Deals Tracker</title>
+  <link rel="stylesheet" href="/style.css">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
-  <!-- Login Screen -->
-  <div id="login-screen" class="screen">
-    <div class="glass-card login-card">
-      <h1>Welcome Back</h1>
-      <p class="subtitle">Log in to manage your debts</p>
-      
-      <form id="login-form">
-        <div class="input-group">
-          <label for="email">Email</label>
-          <input type="email" id="email" required placeholder="name@example.com">
-        </div>
-        <div class="input-group">
-          <label for="password">Password</label>
-          <input type="password" id="password" required placeholder="••••••••">
-        </div>
-        <p id="login-error" class="error-text hidden"></p>
-        <button type="submit" class="btn primary-btn" id="login-btn">Sign In</button>
-      </form>
+  <!-- Navigation Bar (Hidden by default) -->
+  <nav id="navbar" class="navbar glass-card hidden">
+    <div class="nav-brand">Finance Tracker</div>
+    <div class="nav-links">
+      <a href="/debt-tracker" class="nav-link" id="nav-tracker">Dashboard</a>
+      <a href="/config" class="nav-link" id="nav-config">Config</a>
+      <button id="logout-btn" class="btn outline-btn nav-btn">Logout</button>
     </div>
-  </div>
+  </nav>
 
-  <!-- Main App Screen -->
-  <div id="app-screen" class="screen hidden">
-    <header class="app-header glass-card">
-      <h2>Debt Tracker</h2>
-      <div class="header-actions">
-        <button id="add-btn" class="btn primary-btn">Add Debt</button>
-        <button id="logout-btn" class="btn outline-btn">Logout</button>
+  <!-- Main Container -->
+  <div id="main-content">
+    
+    <!-- Login Screen -->
+    <div id="login-screen" class="screen">
+      <div class="glass-card login-card">
+        <h1>Welcome Back</h1>
+        <p class="subtitle">Log in to manage your finances</p>
+        <form id="login-form">
+          <div class="input-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" required placeholder="name@example.com">
+          </div>
+          <div class="input-group">
+            <label for="password">Password</label>
+            <input type="password" id="password" required placeholder="••••••••">
+          </div>
+          <p id="login-error" class="error-text hidden"></p>
+          <button type="submit" class="btn primary-btn" id="login-btn">Sign In</button>
+        </form>
       </div>
-    </header>
+    </div>
 
-    <main class="app-content">
-      <div class="glass-card list-card">
-        <div class="table-container">
-          <table id="debt-table">
-            <thead>
-              <tr>
-                <th>Title</th>
-                <th>Category</th>
-                <th>Date Added</th>
-                <th>Due Date</th>
-                <th>Amount</th>
-                <th>Remarks</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody id="debt-list">
-              <!-- Debt items will be injected here -->
-            </tbody>
-          </table>
-          <div id="empty-state" class="empty-state hidden">
-            <p>No debts found. Click 'Add Debt' to get started.</p>
+    <!-- Tracker Screen (/debt-tracker) -->
+    <div id="tracker-screen" class="screen hidden">
+      <div class="dashboard-grid">
+        
+        <!-- Credit Cards Section -->
+        <div class="glass-card section-card">
+          <div class="section-header">
+            <h2>Credit Cards</h2>
+          </div>
+          
+          <!-- Quick Add Bill -->
+          <div class="quick-add-box">
+            <h3>Add New Bill</h3>
+            <form id="add-cc-bill-form" class="inline-form">
+              <select id="cc-select" required>
+                <option value="" disabled selected>Select Card</option>
+                <!-- Injected via JS -->
+              </select>
+              <input type="number" id="cc-bill-amount" step="0.01" required placeholder="Amount (₹)">
+              <button type="submit" class="btn primary-btn btn-sm">Save</button>
+            </form>
+          </div>
+
+          <!-- Active Bills -->
+          <div class="list-container">
+            <h3>Active Bills</h3>
+            <div id="cc-empty-state" class="empty-state hidden">No active bills!</div>
+            <table id="cc-table" class="data-table">
+              <thead>
+                <tr>
+                  <th>Card</th>
+                  <th>Due Date</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="cc-list">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Personal Deals Section -->
+        <div class="glass-card section-card">
+          <div class="section-header">
+            <h2>Personal Deals</h2>
+          </div>
+
+          <!-- Quick Add Deal -->
+          <div class="quick-add-box">
+            <h3>Add Transaction</h3>
+            <form id="add-deal-form" class="grid-form">
+              <select id="person-select" required>
+                <option value="" disabled selected>Select Person</option>
+                <!-- Injected via JS -->
+              </select>
+              <select id="deal-type" required>
+                <option value="given">Money Given To</option>
+                <option value="taken">Money Taken From</option>
+              </select>
+              <input type="number" id="deal-amount" step="0.01" required placeholder="Amount (₹)">
+              <input type="text" id="deal-remarks" placeholder="Remarks (Optional)">
+              <button type="submit" class="btn primary-btn btn-sm full-width">Save Deal</button>
+            </form>
+          </div>
+
+          <!-- Active Deals -->
+          <div class="list-container">
+            <h3>Active Deals</h3>
+            <div id="deals-empty-state" class="empty-state hidden">No active deals!</div>
+            <table id="deals-table" class="data-table">
+              <thead>
+                <tr>
+                  <th>Person</th>
+                  <th>Type</th>
+                  <th>Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="deals-list">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-
-      <!-- Category Totals -->
-      <div class="glass-card summary-card">
-        <h3>Summary by Category</h3>
-        <div id="category-totals">
-          <!-- Totals will be injected here -->
-        </div>
-        <div class="grand-total">
-          <h4>Total Debt: <span id="grand-total-amount">$0.00</span></h4>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Add Item Modal -->
-  <div id="add-modal" class="modal hidden">
-    <div class="glass-card modal-content">
-      <div class="modal-header">
-        <h3>Add New Debt</h3>
-        <button id="close-modal-btn" class="close-btn">&times;</button>
-      </div>
-      <form id="add-form">
-        <div class="input-group">
-          <label for="debt-title">Title</label>
-          <input type="text" id="debt-title" required placeholder="e.g. Chase Credit Card">
-        </div>
-        <div class="input-group">
-          <label for="debt-category">Category</label>
-          <select id="debt-category" required>
-            <option value="" disabled selected>Select Category</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="Personal Loan">Personal Loan</option>
-            <option value="Mortgage">Mortgage</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="debt-due-date">Due Date</label>
-          <input type="date" id="debt-due-date" required>
-        </div>
-        <div class="input-group">
-          <label for="debt-amount">Amount</label>
-          <input type="number" id="debt-amount" step="0.01" required placeholder="0.00">
-        </div>
-        <div class="input-group">
-          <label for="debt-remarks">Remarks (Optional)</label>
-          <input type="text" id="debt-remarks" placeholder="Any notes...">
-        </div>
-        <div class="modal-actions">
-          <button type="button" id="cancel-modal-btn" class="btn outline-btn">Cancel</button>
-          <button type="submit" class="btn primary-btn" id="save-debt-btn">Save</button>
-        </div>
-      </form>
     </div>
+
+    <!-- Config Screen (/config) -->
+    <div id="config-screen" class="screen hidden">
+      <div class="dashboard-grid">
+        
+        <!-- Manage Credit Cards -->
+        <div class="glass-card section-card">
+          <h2>Manage Credit Cards</h2>
+          <form id="config-cc-form" class="stacked-form">
+            <div class="input-group">
+              <label>Card Name</label>
+              <input type="text" id="config-cc-name" required placeholder="e.g. Amazon Pay">
+            </div>
+            <div class="input-group">
+              <label>Bank</label>
+              <input type="text" id="config-cc-bank" required placeholder="e.g. ICICI">
+            </div>
+            <div class="input-group">
+              <label>Due Date (Day of Month)</label>
+              <input type="number" id="config-cc-due" min="1" max="31" required placeholder="e.g. 15">
+            </div>
+            <button type="submit" class="btn primary-btn">Add Credit Card</button>
+          </form>
+          
+          <div class="config-list-container mt-4">
+            <h3>Saved Cards</h3>
+            <ul id="config-cc-list" class="simple-list"></ul>
+          </div>
+        </div>
+
+        <!-- Manage People -->
+        <div class="glass-card section-card">
+          <h2>Manage People</h2>
+          <form id="config-person-form" class="stacked-form">
+            <div class="input-group">
+              <label>Person Name</label>
+              <input type="text" id="config-person-name" required placeholder="e.g. John Doe">
+            </div>
+            <button type="submit" class="btn primary-btn">Add Person</button>
+          </form>
+          
+          <div class="config-list-container mt-4">
+            <h3>Saved People</h3>
+            <ul id="config-person-list" class="simple-list"></ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 
-  <!-- Script type module for Firebase v10 -->
-  <script type="module" src="app.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 </html>
