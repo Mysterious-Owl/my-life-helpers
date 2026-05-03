@@ -53,35 +53,24 @@
           </div>
           
           <!-- Quick Add Bill -->
-          <div class="quick-add-box">
-            <h3>Add New Bill</h3>
-            <form id="add-cc-bill-form" class="inline-form">
+          <div class="quick-add-container">
+            <form id="add-cc-bill-form" class="clean-form">
               <select id="cc-select" required>
-                <option value="" disabled selected>Select Card</option>
+                <option value="" disabled selected>Card</option>
                 <!-- Injected via JS -->
               </select>
               <input type="number" id="cc-bill-amount" step="0.01" required placeholder="Amount (₹)">
-              <button type="submit" class="btn primary-btn btn-sm">Save</button>
+              <button type="submit" class="btn primary-btn btn-icon">✔</button>
             </form>
           </div>
 
           <!-- Active Bills -->
-          <div class="list-container">
-            <h3>Active Bills</h3>
+          <div class="list-container mt-4">
+            <h3 class="list-title">Active Bills: <span id="cc-total-amount">₹0.00</span></h3>
             <div id="cc-empty-state" class="empty-state hidden">No active bills!</div>
-            <table id="cc-table" class="data-table">
-              <thead>
-                <tr>
-                  <th>Card</th>
-                  <th>Due Date</th>
-                  <th>Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="cc-list">
-                <!-- Injected via JS -->
-              </tbody>
-            </table>
+            <ul id="cc-list" class="item-list">
+              <!-- Injected via JS -->
+            </ul>
           </div>
         </div>
 
@@ -92,40 +81,28 @@
           </div>
 
           <!-- Quick Add Deal -->
-          <div class="quick-add-box">
-            <h3>Add Transaction</h3>
-            <form id="add-deal-form" class="grid-form">
-              <select id="person-select" required>
-                <option value="" disabled selected>Select Person</option>
+          <div class="quick-add-container">
+            <form id="add-deal-form" class="deal-inline-form">
+              <select id="person-select" required class="deal-name">
+                <option value="" disabled selected>Person</option>
                 <!-- Injected via JS -->
               </select>
-              <select id="deal-type" required>
-                <option value="given">Money Given To</option>
-                <option value="taken">Money Taken From</option>
-              </select>
-              <input type="number" id="deal-amount" step="0.01" required placeholder="Amount (₹)">
-              <input type="text" id="deal-remarks" placeholder="Remarks (Optional)">
-              <button type="submit" class="btn primary-btn btn-sm full-width">Save Deal</button>
+              <div class="amount-toggle-group">
+                <button type="button" id="deal-type-btn" class="toggle-btn given" data-type="given" title="Toggle Given(+)/Taken(-)">+</button>
+                <input type="number" id="deal-amount" step="0.01" required placeholder="Amount (₹)" class="deal-amount">
+              </div>
+              <input type="text" id="deal-remarks" placeholder="Remarks" class="deal-remarks">
+              <button type="submit" class="btn primary-btn btn-icon deal-submit">✔</button>
             </form>
           </div>
 
           <!-- Active Deals -->
-          <div class="list-container">
-            <h3>Active Deals</h3>
+          <div class="list-container mt-4">
+            <h3 class="list-title">Active Deals: <span id="deals-total-amount">₹0.00</span></h3>
             <div id="deals-empty-state" class="empty-state hidden">No active deals!</div>
-            <table id="deals-table" class="data-table">
-              <thead>
-                <tr>
-                  <th>Person</th>
-                  <th>Type</th>
-                  <th>Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody id="deals-list">
-                <!-- Injected via JS -->
-              </tbody>
-            </table>
+            <ul id="deals-list" class="item-list">
+              <!-- Injected via JS -->
+            </ul>
           </div>
         </div>
       </div>

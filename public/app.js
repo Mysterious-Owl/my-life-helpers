@@ -48,18 +48,18 @@ const ccBillAmount = document.getElementById('cc-bill-amount');
 
 const addDealForm = document.getElementById('add-deal-form');
 const personSelect = document.getElementById('person-select');
-const dealType = document.getElementById('deal-type');
+const dealTypeBtn = document.getElementById('deal-type-btn');
 const dealAmount = document.getElementById('deal-amount');
 const dealRemarks = document.getElementById('deal-remarks');
 
 // DOM Elements - Tracker (Lists)
 const ccList = document.getElementById('cc-list');
 const ccEmptyState = document.getElementById('cc-empty-state');
-const ccTable = document.getElementById('cc-table');
+const ccTotalAmount = document.getElementById('cc-total-amount');
 
 const dealsList = document.getElementById('deals-list');
 const dealsEmptyState = document.getElementById('deals-empty-state');
-const dealsTable = document.getElementById('deals-table');
+const dealsTotalAmount = document.getElementById('deals-total-amount');
 
 // State
 let currentUser = null;
@@ -260,12 +260,30 @@ addCcBillForm.addEventListener('submit', async (e) => {
   addCcBillForm.reset();
 });
 
+// Toggle Deal Type (+/-)
+dealTypeBtn.addEventListener('click', () => {
+  const isGiven = dealTypeBtn.dataset.type === 'given';
+  if (isGiven) {
+    dealTypeBtn.dataset.type = 'taken';
+    dealTypeBtn.textContent = '-';
+    dealTypeBtn.classList.remove('given');
+    dealTypeBtn.classList.add('taken');
+    dealTypeBtn.title = 'Taken (-)';
+  } else {
+    dealTypeBtn.dataset.type = 'given';
+    dealTypeBtn.textContent = '+';
+    dealTypeBtn.classList.remove('taken');
+    dealTypeBtn.classList.add('given');
+    dealTypeBtn.title = 'Given (+)';
+  }
+});
+
 // Add Deal
 addDealForm.addEventListener('submit', async (e) => {
   e.preventDefault();
   if (!currentUser) return;
   const personId = personSelect.value;
-  const type = dealType.value;
+  const type = dealTypeBtn.dataset.type; // Read from toggle button
   const amount = parseFloat(dealAmount.value);
   const remarks = dealRemarks.value;
   if(!personId || isNaN(amount)) return;
@@ -280,6 +298,12 @@ addDealForm.addEventListener('submit', async (e) => {
   };
   await push(ref(db, `users/${currentUser.uid}/transactions/personalDeals`), data);
   addDealForm.reset();
+  
+  // Reset toggle to given (+)
+  dealTypeBtn.dataset.type = 'given';
+  dealTypeBtn.textContent = '+';
+  dealTypeBtn.classList.remove('taken');
+  dealTypeBtn.classList.add('given');
 });
 
 // Load Transactions
@@ -299,91 +323,153 @@ function loadTransactions() {
 
 function renderCcTransactions(data) {
   ccList.innerHTML = '';
-  let hasActive = false;
+  let total = 0;
   
-  Object.entries(data).forEach(([id, txn]) => {
-    if (txn.isPaid) return; // Only show active bills
-    hasActive = true;
+  // Convert to array for sorting
+  const bills = Object.entries(data).filter(([id, txn]) => !txn.isPaid).map(([id, txn]) => {
+    const card = currentConfig.creditCards[txn.cardId] || { name: 'Unknown Card', bank: '?', dueDay: 31 };
     
-    // Get card details
-    const card = currentConfig.creditCards[txn.cardId] || { name: 'Unknown Card', bank: '?', dueDay: '?' };
+    // Calculate a "next due date" for sorting purposes
+    const now = new Date();
+    const dueDayNum = parseInt(card.dueDay) || 31;
+    let nextDate = new Date(now.getFullYear(), now.getMonth(), dueDayNum);
+    if (nextDate < now) {
+      nextDate.setMonth(nextDate.getMonth() + 1);
+    }
     
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td><strong>${escapeHtml(card.name)}</strong><br><small class="subtitle" style="margin:0">${escapeHtml(card.bank)}</small></td>
-      <td>${card.dueDay}th of month</td>
-      <td><strong>${formatINR(txn.amount)}</strong></td>
-      <td>
-        <button class="btn success-btn mark-paid-btn" data-id="${id}" data-type="cc">Mark Paid</button>
-      </td>
+    return { id, txn, card, nextDate };
+  });
+  
+  // Sort by next due date
+  bills.sort((a, b) => a.nextDate - b.nextDate);
+
+  bills.forEach(({ id, txn, card, nextDate }) => {
+    total += txn.amount;
+    
+    // Check if urgent (within 7 days)
+    const now = new Date();
+    const daysUntilDue = Math.ceil((nextDate - now) / (1000 * 60 * 60 * 24));
+    const isUrgent = daysUntilDue <= 7 && daysUntilDue >= 0;
+    const textClass = isUrgent ? 'urgent-text' : '';
+    
+    // Formatting nextDate
+    const dateStr = nextDate.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="paid-overlay">✔</div>
+      <div class="item-row">
+        <span class="item-name ${textClass}">${escapeHtml(card.name)} - ${escapeHtml(card.bank)}</span>
+        <span class="item-amount ${textClass}">${formatINR(txn.amount)}</span>
+      </div>
+      <div class="item-row">
+        <span class="item-subtext ${textClass}">${dateStr}</span>
+      </div>
     `;
-    ccList.appendChild(tr);
+    
+    // Click logic for marking paid
+    li.addEventListener('click', async (e) => {
+      const isTouch = window.matchMedia("(hover: none)").matches;
+      if (isTouch) {
+        if (!li.classList.contains('show-overlay')) {
+          document.querySelectorAll('.item-list li').forEach(el => el.classList.remove('show-overlay'));
+          li.classList.add('show-overlay');
+          return;
+        }
+      }
+      
+      await update(ref(db, `users/${currentUser.uid}/transactions/creditCards/${id}`), {
+        isPaid: true,
+        datePaid: new Date().toISOString()
+      });
+    });
+    
+    ccList.appendChild(li);
   });
 
-  if (!hasActive) {
-    ccTable.classList.add('hidden');
+  ccTotalAmount.textContent = formatINR(total);
+
+  if (bills.length === 0) {
+    ccList.classList.add('hidden');
     ccEmptyState.classList.remove('hidden');
   } else {
-    ccTable.classList.remove('hidden');
+    ccList.classList.remove('hidden');
     ccEmptyState.classList.add('hidden');
   }
-  attachMarkPaidListeners();
 }
 
 function renderDealsTransactions(data) {
   dealsList.innerHTML = '';
-  let hasActive = false;
+  let total = 0;
   
-  Object.entries(data).forEach(([id, txn]) => {
-    if (txn.isPaid) return; // Only show active deals
-    hasActive = true;
-    
-    // Get person details
+  const deals = Object.entries(data).filter(([id, txn]) => !txn.isPaid);
+
+  deals.forEach(([id, txn]) => {
     const person = currentConfig.people[txn.personId] || { name: 'Unknown Person' };
-    const typeLabel = txn.type === 'given' ? 'Given To' : 'Taken From';
+    
+    // If taken (-), if given (+)
+    // The requirement says "+/- sign (borrowed/sent) as symbol"
+    const sign = txn.type === 'given' ? '+' : '-';
     const amountClass = txn.type === 'given' ? 'given-amount' : 'taken-amount';
     
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>
-        <strong>${escapeHtml(person.name)}</strong>
-        ${txn.remarks ? `<br><small class="subtitle" style="margin:0">${escapeHtml(txn.remarks)}</small>` : ''}
-      </td>
-      <td>${typeLabel}</td>
-      <td class="${amountClass}"><strong>${formatINR(txn.amount)}</strong></td>
-      <td>
-        <button class="btn success-btn mark-paid-btn" data-id="${id}" data-type="deal">Mark Paid</button>
-      </td>
+    // Total computation: we can just sum up the raw amounts for now or net them.
+    // Usually total is absolute, but maybe net is better. Let's do absolute sum or net?
+    // Let's do net: given is positive, taken is negative.
+    if (txn.type === 'given') {
+      total += txn.amount;
+    } else {
+      total -= txn.amount;
+    }
+    
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="paid-overlay">✔</div>
+      <div class="item-row">
+        <span class="item-name">${escapeHtml(person.name)}</span>
+        <span class="item-amount ${amountClass}">${sign}${formatINR(txn.amount)}</span>
+      </div>
+      <div class="item-row">
+        <span class="item-subtext">${escapeHtml(txn.remarks || 'No remarks')}</span>
+      </div>
     `;
-    dealsList.appendChild(tr);
-  });
-
-  if (!hasActive) {
-    dealsTable.classList.add('hidden');
-    dealsEmptyState.classList.remove('hidden');
-  } else {
-    dealsTable.classList.remove('hidden');
-    dealsEmptyState.classList.add('hidden');
-  }
-  attachMarkPaidListeners();
-}
-
-function attachMarkPaidListeners() {
-  document.querySelectorAll('.mark-paid-btn').forEach(btn => {
-    // Only attach once
-    btn.onclick = async (e) => {
-      const id = e.target.getAttribute('data-id');
-      const type = e.target.getAttribute('data-type');
-      const path = type === 'cc' ? 'creditCards' : 'personalDeals';
+    
+    // Click logic for marking paid
+    li.addEventListener('click', async (e) => {
+      const isTouch = window.matchMedia("(hover: none)").matches;
+      if (isTouch) {
+        if (!li.classList.contains('show-overlay')) {
+          document.querySelectorAll('.item-list li').forEach(el => el.classList.remove('show-overlay'));
+          li.classList.add('show-overlay');
+          return;
+        }
+      }
       
-      // Update isPaid to true
-      await update(ref(db, `users/${currentUser.uid}/transactions/${path}/${id}`), {
+      await update(ref(db, `users/${currentUser.uid}/transactions/personalDeals/${id}`), {
         isPaid: true,
         datePaid: new Date().toISOString()
       });
-    };
+    });
+    
+    dealsList.appendChild(li);
   });
+
+  dealsTotalAmount.textContent = formatINR(Math.abs(total)) + (total < 0 ? ' (Net Taken)' : ' (Net Given)');
+
+  if (deals.length === 0) {
+    dealsList.classList.add('hidden');
+    dealsEmptyState.classList.remove('hidden');
+  } else {
+    dealsList.classList.remove('hidden');
+    dealsEmptyState.classList.add('hidden');
+  }
 }
+
+// Remove mobile overlay if clicked outside
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.item-list li')) {
+    document.querySelectorAll('.item-list li').forEach(el => el.classList.remove('show-overlay'));
+  }
+});
 
 
 // --- Utilities ---
