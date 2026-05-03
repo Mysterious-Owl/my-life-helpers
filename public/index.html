@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Debt Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <!-- Login Screen -->
+  <div id="login-screen" class="screen">
+    <div class="glass-card login-card">
+      <h1>Welcome Back</h1>
+      <p class="subtitle">Log in to manage your debts</p>
+      
+      <form id="login-form">
+        <div class="input-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" required placeholder="name@example.com">
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="••••••••">
+        </div>
+        <p id="login-error" class="error-text hidden"></p>
+        <button type="submit" class="btn primary-btn" id="login-btn">Sign In</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main App Screen -->
+  <div id="app-screen" class="screen hidden">
+    <header class="app-header glass-card">
+      <h2>Debt Tracker</h2>
+      <div class="header-actions">
+        <button id="add-btn" class="btn primary-btn">Add Debt</button>
+        <button id="logout-btn" class="btn outline-btn">Logout</button>
+      </div>
+    </header>
+
+    <main class="app-content">
+      <div class="glass-card list-card">
+        <div class="table-container">
+          <table id="debt-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Category</th>
+                <th>Date Added</th>
+                <th>Due Date</th>
+                <th>Amount</th>
+                <th>Remarks</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="debt-list">
+              <!-- Debt items will be injected here -->
+            </tbody>
+          </table>
+          <div id="empty-state" class="empty-state hidden">
+            <p>No debts found. Click 'Add Debt' to get started.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Totals -->
+      <div class="glass-card summary-card">
+        <h3>Summary by Category</h3>
+        <div id="category-totals">
+          <!-- Totals will be injected here -->
+        </div>
+        <div class="grand-total">
+          <h4>Total Debt: <span id="grand-total-amount">$0.00</span></h4>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Add Item Modal -->
+  <div id="add-modal" class="modal hidden">
+    <div class="glass-card modal-content">
+      <div class="modal-header">
+        <h3>Add New Debt</h3>
+        <button id="close-modal-btn" class="close-btn">&times;</button>
+      </div>
+      <form id="add-form">
+        <div class="input-group">
+          <label for="debt-title">Title</label>
+          <input type="text" id="debt-title" required placeholder="e.g. Chase Credit Card">
+        </div>
+        <div class="input-group">
+          <label for="debt-category">Category</label>
+          <select id="debt-category" required>
+            <option value="" disabled selected>Select Category</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="Personal Loan">Personal Loan</option>
+            <option value="Mortgage">Mortgage</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="debt-due-date">Due Date</label>
+          <input type="date" id="debt-due-date" required>
+        </div>
+        <div class="input-group">
+          <label for="debt-amount">Amount</label>
+          <input type="number" id="debt-amount" step="0.01" required placeholder="0.00">
+        </div>
+        <div class="input-group">
+          <label for="debt-remarks">Remarks (Optional)</label>
+          <input type="text" id="debt-remarks" placeholder="Any notes...">
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="cancel-modal-btn" class="btn outline-btn">Cancel</button>
+          <button type="submit" class="btn primary-btn" id="save-debt-btn">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Script type module for Firebase v10 -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

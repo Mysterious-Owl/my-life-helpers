@@ -1,0 +1,5 @@
+HTML5
+CSS3 (Variables, Flexbox, Grid, Glassmorphism)
+Vanilla JavaScript (ES6+)
+Firebase Authentication
+Firebase Realtime Database

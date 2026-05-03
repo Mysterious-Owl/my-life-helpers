@@ -1,0 +1,1 @@
+A lightweight suite of frontend web applications (starting with a Debt Tracker) built with Vanilla JavaScript, HTML, CSS, and powered by Firebase Realtime Database and Authentication.
