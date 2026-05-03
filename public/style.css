@@ -210,6 +210,7 @@ input[type=number] {
   grid-template-columns: 2fr 1fr auto;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  align-items: center;
 }
 .clean-form select, .clean-form input {
   width: 100%;
@@ -217,13 +218,15 @@ input[type=number] {
 
 /* Button override */
 .btn-icon {
-  padding: 0.5rem;
-  width: 32px;
-  height: auto;
+  padding: 0;
+  width: 42px;
+  height: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  border-radius: 8px;
+  flex: none;
 }
 
 .grid-form {
@@ -452,23 +455,67 @@ input[type=number] {
   background: transparent;
   border-radius: 0 8px 8px 0;
   outline: none;
+  min-width: 0; /* allows shrinking if needed */
 }
 .deal-amount:focus {
   box-shadow: none;
 }
 .deal-remarks {
-  flex: 1; /* 1 unit */
+  flex: 1;
 }
 .deal-submit {
-  flex: 0 0 32px;
+  flex: none;
 }
 
 @media (max-width: 600px) {
-  .deal-inline-form {
-    flex-wrap: wrap;
+  #main-content {
+    padding: 0 0.5rem 1rem;
   }
-  .deal-name, .amount-toggle-group, .deal-remarks {
-    flex: 1 1 100%;
+  .navbar {
+    margin: 0.5rem;
+    padding: 1rem;
+  }
+  .section-card {
+    padding: 1rem;
+  }
+  
+  /* Make the tick box slightly smaller on mobile */
+  .btn-icon {
+    width: 36px;
+    height: 36px;
+  }
+  
+  /* Inputs slightly smaller on mobile to save space */
+  input, select {
+    padding: 0.6rem 0.75rem;
+    font-size: 0.9rem;
+  }
+
+  /* Two lines for deal inline form using Grid */
+  .deal-inline-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    grid-template-rows: auto auto;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .deal-name {
+    grid-column: 1 / 2;
+    grid-row: 1;
+    width: 100%;
+  }
+  .amount-toggle-group {
+    grid-column: 2 / 4;
+    grid-row: 1;
+    width: 100%;
+  }
+  .deal-remarks {
+    grid-column: 1 / 3;
+    grid-row: 2;
+    width: 100%;
+  }
+  .deal-submit {
+    grid-column: 3 / 4;
+    grid-row: 2;
   }
 }
-
